@@ -3,6 +3,8 @@ library(tidyverse)
 
 d <- read_csv("data_clean.csv")
 
+#Strike % by pitch count
+
 d <- d %>% 
 	mutate(
 		strike = case_when(
@@ -37,4 +39,38 @@ ggplot(dd) +
 	theme_bw()
 
 
+#Ks and BBs by pitch count
+
+d <- d %>% 
+  mutate(
+    strikeout = case_when(
+      non_bip_result %in% c("Strikeout,") ~ 1,
+      TRUE ~ 0
+    )) %>% 
+  mutate(
+    walk = case_when(
+      non_bip_result %in% c("Walk,") ~ 1,
+      TRUE ~ 0
+    ))
+
+
+dk <- d %>% 
+  group_by(pitch_group) %>% 
+  summarize(
+    Outcome = sum(strikeout),
+    Name = "Strikeout"
+  )
+
+dbb <- d %>% 
+  group_by(pitch_group) %>% 
+  summarize(
+    Outcome = sum(walk),
+    Name = "Walk"
+  ) 
+
+ddd <- rbind(dk, dbb)
+
+ggplot(ddd, aes(x = pitch_group, y = Outcome, group = Name, color = Name)) +
+  geom_point() +
+  geom_line()
 			
