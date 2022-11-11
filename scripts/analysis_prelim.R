@@ -1,7 +1,7 @@
 #source("Kishor import.R")
 library(tidyverse)
 
-d <- read_csv("data_clean.csv")
+d <- read_csv("../data/data_clean.csv")
 
 #Strike % by pitch count
 
