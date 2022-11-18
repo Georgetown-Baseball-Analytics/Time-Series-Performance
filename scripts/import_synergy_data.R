@@ -9,7 +9,7 @@ library(janitor)
 
 
 import_data <- function() {
-	d <- read_csv("2022 season through 4-15.csv")
+	d <- read_csv("../data/data_tonas.csv")
 	d <- clean_names(d)
 	return(d)
 }
@@ -88,6 +88,18 @@ add_pa_id <- function(d) {
 	return(d)
 }
 
+clean_result <- function(d) {
+    d <- d %>% 
+        mutate(
+            non_bip_result_clean = str_remove_all(non_bip_result, ","),
+            non_bip_result = if_else(non_bip_result_clean == "", NA_character_, non_bip_result_clean)
+        ) %>% 
+        select(-non_bip_result_clean)
+    
+    return(d)
+                
+}
+
 clean_data_pipeline <- function(d) {
 	
 	d <- d %>%
@@ -95,13 +107,14 @@ clean_data_pipeline <- function(d) {
 		clean_inning() %>% 
 		clean_count() %>% 
 		add_outing_id() %>% 
-		add_pa_id()
+		add_pa_id() %>% 
+	    clean_result()
 	
 	return(d)
 }
 
 export_data <- function(d) {
-	rio::export(d, "data_clean_2022.csv")
+	rio::export(d, "../data/tonas_clean.csv")
 }
 
 d <- import_data() %>% clean_data_pipeline() %>% export_data()

@@ -1,7 +1,7 @@
 #source("Kishor import.R")
 library(tidyverse)
 
-d <- read_csv("../data/data_clean.csv")
+d <- read_csv("../data/tonas_clean.csv")
 
 #Strike % by pitch count
 
@@ -74,3 +74,46 @@ ggplot(ddd, aes(x = pitch_group, y = Outcome, group = Name, color = Name)) +
   geom_point() +
   geom_line()
 			
+
+
+
+# Batting Average Aggregation ---------------------------------------------
+
+d_ba <- d %>% 
+    group_by(outing_id, pa_id) %>% 
+    summarize(no_result = sum(!is.na(bip_result)) + sum(!is.na(non_bip_result)))
+
+assertthat::assert_that(all(d_ba$no_result == 1))
+# fix later
+
+
+d_ba <- d %>% 
+    filter(!is.na(bip_result) | !is.na(non_bip_result)) %>% 
+    group_by(pitch_group, outing_id, pa_id) %>% 
+    summarize(
+        pa_outcome = if_else(!is.na(bip_result), bip_result, non_bip_result)
+    ) %>% 
+    mutate( # this is what changes for slugging and OBP
+        ba_bin = case_when(
+            pa_outcome %in% c(
+                "Single",
+                "Double",
+                "Home Run"
+            ) ~ 1,
+            pa_outcome %in% c(
+                "Flyout",
+                "Strikeout",
+                "Groundout",
+                "Lineout"
+            ) ~ 0,
+            pa_outcome == "Walk" ~ NA_real_,
+            TRUE ~ NA_real_
+            # do this for all
+        )
+    )
+
+d_ba_collapsed <- d_ba %>% 
+    group_by(pitch_group) %>% 
+    summarize(
+        mean_ba = mean(ba_bin, na.rm = T)
+    )
