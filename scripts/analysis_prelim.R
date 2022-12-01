@@ -44,12 +44,12 @@ ggplot(dd) +
 d <- d %>% 
   mutate(
     strikeout = case_when(
-      non_bip_result %in% c("Strikeout,") ~ 1,
+      non_bip_result %in% c("Strikeout") ~ 1,
       TRUE ~ 0
     )) %>% 
   mutate(
     walk = case_when(
-      non_bip_result %in% c("Walk,") ~ 1,
+      non_bip_result %in% c("Walk") ~ 1,
       TRUE ~ 0
     ))
 
@@ -58,14 +58,14 @@ dk <- d %>%
   group_by(pitch_group) %>% 
   summarize(
     Outcome = sum(strikeout),
-    Name = "Strikeout"
+    Name = "strikeout"
   )
 
 dbb <- d %>% 
   group_by(pitch_group) %>% 
   summarize(
     Outcome = sum(walk),
-    Name = "Walk"
+    Name = "walk"
   ) 
 
 ddd <- rbind(dk, dbb)
@@ -104,7 +104,8 @@ d_ba <- d %>%
                 "Flyout",
                 "Strikeout",
                 "Groundout",
-                "Lineout"
+                "Lineout",
+                "Lined Into Double Play"
             ) ~ 0,
             pa_outcome == "Walk" ~ NA_real_,
             TRUE ~ NA_real_
@@ -117,3 +118,38 @@ d_ba_collapsed <- d_ba %>%
     summarize(
         mean_ba = mean(ba_bin, na.rm = T)
     )
+
+
+# Slugging Percentage Aggregation --------------------------------------------------------------------
+
+d_slg <- d %>% 
+  group_by(outing_id, pa_id) %>% 
+  summarize(no_result = sum(!is.na(bip_result)) + sum(!is.na(non_bip_result)))
+
+assertthat::assert_that(all(d_ba$no_result == 1))
+# fix later
+
+
+d_slg <- d %>% 
+  filter(!is.na(bip_result) | !is.na(non_bip_result)) %>% 
+  group_by(pitch_group, outing_id, pa_id) %>% 
+  summarize(
+    pa_outcome = if_else(!is.na(bip_result), bip_result, non_bip_result)
+  ) %>% 
+  mutate( # this is what changes for slugging and OBP
+    slg_bin = case_when(
+      pa_outcome %in% c("Single") ~ 1,
+      pa_outcome %in% c("Double") ~ 2,
+      pa_outcome %in% c("Triple") ~ 3,
+      pa_outcome %in% c("Home Run") ~ 4,
+      pa_outcome %in% "Walk" ~ NA_real_,
+      TRUE ~ NA_real_
+      # do this for all
+    )
+  )
+
+d_slg_collapsed <- d_slg %>% 
+  group_by(pitch_group) %>% 
+  summarize(
+    mean_ba = mean(slg_bin, na.rm = T)
+  )
