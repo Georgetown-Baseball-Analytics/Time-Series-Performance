@@ -116,7 +116,8 @@ d_ba <- d %>%
 d_ba_collapsed <- d_ba %>% 
     group_by(pitch_group) %>% 
     summarize(
-        mean_ba = mean(ba_bin, na.rm = T)
+        Outcome = mean(ba_bin, na.rm = T),
+        Name = ".AVG"
     )
 
 
@@ -126,7 +127,7 @@ d_slg <- d %>%
   group_by(outing_id, pa_id) %>% 
   summarize(no_result = sum(!is.na(bip_result)) + sum(!is.na(non_bip_result)))
 
-assertthat::assert_that(all(d_ba$no_result == 1))
+assertthat::assert_that(all(d_slg$no_result == 1))
 # fix later
 
 
@@ -157,7 +158,59 @@ d_slg <- d %>%
 d_slg_collapsed <- d_slg %>% 
   group_by(pitch_group) %>% 
   summarize(
-    total_bases = sum(single_bin) + 2*sum(double_bin) + 3*sum(triple_bin) + 4*sum(hr_bin),
-    at_bats = sum(at_bat),
-    slg_pct = total_bases/at_bats
+    Outcome = (sum(single_bin) + 2*sum(double_bin) + 3*sum(triple_bin) + 4*sum(hr_bin))/sum(at_bat),
+    Name = ".SLG"
   )
+
+
+# On Base Percentage Aggregation --------------------------------------------------------------------
+
+d_obp <- d %>% 
+  group_by(outing_id, pa_id) %>% 
+  summarize(no_result = sum(!is.na(bip_result)) + sum(!is.na(non_bip_result)))
+
+assertthat::assert_that(all(d_obp$no_result == 1))
+# fix later
+
+
+d_obp <- d %>% 
+  filter(!is.na(bip_result) | !is.na(non_bip_result)) %>% 
+  group_by(pitch_group, outing_id, pa_id) %>% 
+  summarize(
+    pa_outcome = if_else(!is.na(bip_result), bip_result, non_bip_result)
+  ) %>% 
+  mutate( # this is what changes for slugging and OBP
+    obp_bin = case_when(
+      pa_outcome %in% c(
+        "Single",
+        "Double",
+        "Home Run",
+        "Walk"
+      ) ~ 1,
+      pa_outcome %in% c(
+        "Flyout",
+        "Strikeout",
+        "Groundout",
+        "Lineout",
+        "Lined Into Double Play"
+      ) ~ 0,
+      TRUE ~ NA_real_
+      # do this for all
+    )
+  )
+
+d_obp_collapsed <- d_obp %>% 
+  group_by(pitch_group) %>% 
+  summarize(
+    Outcome = mean(obp_bin, na.rm = T),
+    Name = ".OBP"
+  )
+
+#Graph for performance by pitch count -------------------------------------------------------------
+
+dpitchperf <- rbind(d_ba_collapsed, d_slg_collapsed, d_obp_collapsed)
+
+ggplot(dpitchperf, aes(x = pitch_group, y = Outcome, group = Name, color = Name)) +
+  geom_point() +
+  geom_line()
+
