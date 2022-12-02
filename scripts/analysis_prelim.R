@@ -136,20 +136,28 @@ d_slg <- d %>%
   summarize(
     pa_outcome = if_else(!is.na(bip_result), bip_result, non_bip_result)
   ) %>% 
-  mutate( # this is what changes for slugging and OBP
-    slg_bin = case_when(
+  mutate( 
+    single_bin = case_when(
       pa_outcome %in% c("Single") ~ 1,
-      pa_outcome %in% c("Double") ~ 2,
-      pa_outcome %in% c("Triple") ~ 3,
-      pa_outcome %in% c("Home Run") ~ 4,
-      pa_outcome %in% "Walk" ~ NA_real_,
-      TRUE ~ NA_real_
-      # do this for all
-    )
+      TRUE ~ 0),
+    double_bin = case_when(
+      pa_outcome %in% c("Double") ~ 1,
+      TRUE ~ 0),
+    triple_bin = case_when(
+      pa_outcome %in% c("Triple") ~ 1,
+      TRUE ~ 0),
+    hr_bin = case_when(
+      pa_outcome %in% c("Home Run") ~ 1,
+      TRUE ~ 0),
+    at_bat = case_when(
+      pa_outcome %in% c("Walk", "Sacrifice Bunt") ~ 0,
+      TRUE ~ 1)
   )
 
 d_slg_collapsed <- d_slg %>% 
   group_by(pitch_group) %>% 
   summarize(
-    mean_ba = mean(slg_bin, na.rm = T)
+    total_bases = sum(single_bin) + 2*sum(double_bin) + 3*sum(triple_bin) + 4*sum(hr_bin),
+    at_bats = sum(at_bat),
+    slg_pct = total_bases/at_bats
   )
