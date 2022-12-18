@@ -123,6 +123,8 @@ d_ba <- d %>%
             pa_outcome %in% c(
                 "Single",
                 "Double",
+                "Ground Rule Double",
+                "Triple",
                 "Home Run"
             ) ~ 1,
             pa_outcome %in% c(
@@ -130,9 +132,14 @@ d_ba <- d %>%
                 "Strikeout",
                 "Groundout",
                 "Lineout",
-                "Lined Into Double Play"
+                "Lined Into Double Play",
+                "Bunt Groundout",
+                "Popout",
+                "Field Error",
+                "Grounded Into Double Play",
+                "Fielder's Choice - Out",
+                "Fielder's Choice - Safe"
             ) ~ 0,
-            pa_outcome == "Walk" ~ NA_real_,
             TRUE ~ NA_real_
             # do this for all
         )
@@ -167,7 +174,7 @@ d_slg <- d %>%
       pa_outcome %in% c("Single") ~ 1,
       TRUE ~ 0),
     double_bin = case_when(
-      pa_outcome %in% c("Double") ~ 1,
+      pa_outcome %in% c("Double", "Ground Rule Double") ~ 1,
       TRUE ~ 0),
     triple_bin = case_when(
       pa_outcome %in% c("Triple") ~ 1,
@@ -176,7 +183,7 @@ d_slg <- d %>%
       pa_outcome %in% c("Home Run") ~ 1,
       TRUE ~ 0),
     at_bat = case_when(
-      pa_outcome %in% c("Walk", "Sacrifice Bunt") ~ 0,
+      pa_outcome %in% c("Walk", "Sacrifice Bunt", "Sacrifice Fly", "Hit By Pitch") ~ 0,
       TRUE ~ 1)
   )
 
@@ -209,17 +216,16 @@ d_obp <- d %>%
       pa_outcome %in% c(
         "Single",
         "Double",
+        "Ground Rule Double",
+        "Triple",
+        "Hit By Pitch",
         "Home Run",
         "Walk"
       ) ~ 1,
       pa_outcome %in% c(
-        "Flyout",
-        "Strikeout",
-        "Groundout",
-        "Lineout",
-        "Lined Into Double Play"
-      ) ~ 0,
-      TRUE ~ NA_real_
+        "Sacrifice Bunt"
+      ) ~ NA_real_,
+      TRUE ~ 0
       # do this for all
     )
   )
@@ -239,3 +245,5 @@ ggplot(dpitchperf, aes(x = pitch_group, y = Outcome, group = Name, color = Name)
   geom_point() +
   geom_line()
 
+ggplot(dpitchperf, aes(x = pitch_group, y = Outcome, fill = Name)) +
+  geom_bar(stat = "identity", position = "dodge")
