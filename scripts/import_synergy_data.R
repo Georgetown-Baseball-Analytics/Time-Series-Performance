@@ -9,7 +9,7 @@ library(janitor)
 
 
 import_data <- function() {
-	d <- read_csv("../data/data_tonas.csv")
+	d <- read_csv("../data/Tonas 2019-2021.csv")
 	d <- clean_names(d)
 	return(d)
 }
@@ -114,7 +114,7 @@ clean_data_pipeline <- function(d) {
 }
 
 export_data <- function(d) {
-	rio::export(d, "../data/tonas_clean.csv")
+	rio::export(d, "../data/tonas2019-2021_clean.csv")
 }
 
 d <- import_data() %>% clean_data_pipeline() %>% export_data()

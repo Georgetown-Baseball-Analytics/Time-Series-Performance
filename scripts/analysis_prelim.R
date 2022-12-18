@@ -1,16 +1,11 @@
-#source("Kishor import.R")
+#source("import_synergy_data.R")
 library(tidyverse)
 
-d <- read_csv("../data/tonas_clean.csv")
+d <- read_csv("../data/tonas2019-2021_clean.csv")
 
-#Strike % by pitch count
+#Modify data set to include pitch counts
 
 d <- d %>% 
-	mutate(
-		strike = case_when(
-			pitch_result %in% c("Strike Swinging", "Strike Taken", "Foul", "BIP") ~ 1,
-			TRUE ~ 0
-		)) %>% 
 		group_by(outing_id) %>% 
 	mutate(
 		pitch_num_by_outing = row_number()) %>% 
@@ -22,7 +17,14 @@ d <- d %>%
 		pitch_group = str_c(pg_a, pg_b, sep = "-")
 		)
 
-dd <- d %>% 
+#Strike % across pitch counts
+
+d_strikepct <- d %>% 
+  mutate(
+    strike = case_when(
+      pitch_result %in% c("Strike Swinging", "Strike Taken", "Foul", "BIP") ~ 1,
+      TRUE ~ 0
+    )) 	 %>% 
 	group_by(pitch_group) %>% 
 	summarize(
 		strike_pct = mean(strike),
@@ -31,12 +33,35 @@ dd <- d %>%
 
 pitcher <- unique(d$pitcher)
 
-ggplot(dd) +
+ggplot(d_strikepct) +
 	geom_point(aes(x = pitch_group, y = strike_pct)) +
 	geom_line(aes(x = pitch_group, y = strike_pct, group = 1)) +
 	scale_y_continuous(labels = scales::percent) +
 	labs(title = paste(pitcher, "Strike % by Pitch Count"), y = "Strike Percentage", x = "Pitch Number") +
 	theme_bw()
+
+#strike % across innings
+
+d_strikepct_innings <- d %>% 
+  mutate(
+    strike = case_when(
+      pitch_result %in% c("Strike Swinging", "Strike Taken", "Foul", "BIP") ~ 1,
+      TRUE ~ 0
+    )) 	 %>% 
+  group_by(inning_num) %>% 
+  summarize(
+    strike_pct = mean(strike),
+    count = n(),
+  )
+
+pitcher <- unique(d$pitcher)
+
+ggplot(d_strikepct_innings) +
+  geom_point(aes(x = inning_num, y = strike_pct)) +
+  geom_line(aes(x = inning_num, y = strike_pct, group = 1)) +
+  scale_y_continuous(labels = scales::percent) +
+  labs(title = paste(pitcher, "Strike % by Inning"), y = "Strike Percentage", x = "Inning Number") +
+  theme_bw()
 
 
 #Ks and BBs by pitch count
@@ -68,13 +93,13 @@ dbb <- d %>%
     Name = "walk"
   ) 
 
-ddd <- rbind(dk, dbb)
+d_ksandbbs <- rbind(dk, dbb)
 
-ggplot(ddd, aes(x = pitch_group, y = Outcome, group = Name, color = Name)) +
+ggplot(d_ksandbbs, aes(x = pitch_group, y = Outcome, group = Name, color = Name)) +
   geom_point() +
   geom_line()
 			
-
+#does he have more strikeouts at the beginning because he threw more pitches
 
 
 # Batting Average Aggregation ---------------------------------------------
