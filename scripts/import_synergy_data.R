@@ -10,10 +10,11 @@ library(janitor)
 
 import_data <- function() {
   repeat{
-    d <- readline(prompt = "Enter the imported file name: ")
-    print("If you got an error, please view the message below and restart the program")
-    d <- read.csv(paste("../data/",d,sep = "",collapse = ""))
-    d <- clean_names(d)
+    d <- readline(prompt = "Enter the raw file name: ")
+    d <- read.csv(paste("../data/",d,sep = "",collapse = ""), check.names = FALSE)
+    d1 <- seq.int(nrow(d))
+    d <- cbind(d1,d)
+    names(d) <- names(d)[-1]
     return(d)
     break
   }
@@ -119,8 +120,12 @@ clean_data_pipeline <- function(d) {
 }
 
 export_data <- function(d) {
-	rio::export(d, "../data/tonas2019-2021_clean.csv")
+  e <- readline(prompt = "Enter the clean file name: ")
+  print(paste("Exported file as",e))
+	rio::export(d, paste("../data/",e,sep = "",collapse = ""))
 }
 
-d <- import_data() %>% clean_data_pipeline() %>% export_data()
+d <- import_data()
+d <- clean_data_pipeline(d)
+d <- export_data(d)
 

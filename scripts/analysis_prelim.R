@@ -1,8 +1,8 @@
-#source("import_synergy_data.R")
-library(tidyverse)
+#setwd("C:/Users/rajmo/Documents/Baseball/Time-Series-Performance/scripts")
+source("import_synergy_data.R")
 
-d <- read_csv("../data/tonas2019-2021_clean.csv")
-
+d <- read.csv(d)
+d <- replace(d,d == "", NA)
 #Modify data set to include pitch counts
 
 d <- d %>% 
@@ -244,6 +244,3 @@ dpitchperf <- rbind(d_ba_collapsed, d_slg_collapsed, d_obp_collapsed)
 ggplot(dpitchperf, aes(x = pitch_group, y = Outcome, group = Name, color = Name)) +
   geom_point() +
   geom_line()
-
-ggplot(dpitchperf, aes(x = pitch_group, y = Outcome, fill = Name)) +
-  geom_bar(stat = "identity", position = "dodge")
