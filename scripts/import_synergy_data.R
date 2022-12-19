@@ -1,4 +1,5 @@
 # DO NOT EDIT THIS SCRIPT DIRECTLY, MAKE A COPY
+#setwd("C:/Users/rajmo/Documents/Baseball/Time-Series-Performance/scripts")
 
 # Ensure you have installed the packages below. Then, make sure the import function properly imports the data you are trying to analyze.
 
@@ -7,12 +8,16 @@ library(tidyverse)
 library(rio)
 library(janitor)
 
-
 import_data <- function() {
-	d <- read_csv("../data/Tonas 2019-2021.csv")
-	d <- clean_names(d)
-	return(d)
-}
+  repeat{
+    d <- readline(prompt = "Enter the imported file name: ")
+    print("If you got an error, please view the message below and restart the program")
+    d <- read.csv(paste("../data/",d,sep = "",collapse = ""))
+    d <- clean_names(d)
+    return(d)
+    break
+  }
+}  
 
 clean_inning <- function(d) {
 	if (any(str_length(d$inning) < 2) | any(str_length(d$inning) > 3)) {
