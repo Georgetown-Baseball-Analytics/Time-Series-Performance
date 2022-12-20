@@ -1,0 +1,21 @@
+---
+title: "Angelo Tonas 2019-2021"
+author: "Kishor Moorthy"
+date: "12/20/2022"
+output:
+  pdf_document: default
+  html_document: default
+params:
+  file: 'rmarkdownfile.Rds'
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Angelo Tonas 2019-2021
+
+```{r, echo=FALSE}
+plot_list <- read_rds(params$file)
+lapply(plot_list, print)
+```

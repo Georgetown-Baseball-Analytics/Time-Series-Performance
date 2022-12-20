@@ -33,7 +33,7 @@ d_strikepct <- d %>%
 
 pitcher <- unique(d$pitcher)
 
-ggplot(d_strikepct) +
+graph1 <- ggplot(d_strikepct) +
 	geom_point(aes(x = pitch_group, y = strike_pct)) +
 	geom_line(aes(x = pitch_group, y = strike_pct, group = 1)) +
 	scale_y_continuous(labels = scales::percent) +
@@ -56,7 +56,7 @@ d_strikepct_innings <- d %>%
 
 pitcher <- unique(d$pitcher)
 
-ggplot(d_strikepct_innings) +
+graph2 <- ggplot(d_strikepct_innings) +
   geom_point(aes(x = inning_num, y = strike_pct)) +
   geom_line(aes(x = inning_num, y = strike_pct, group = 1)) +
   scale_y_continuous(labels = scales::percent) +
@@ -95,7 +95,7 @@ dbb <- d %>%
 
 d_ksandbbs <- rbind(dk, dbb)
 
-ggplot(d_ksandbbs, aes(x = pitch_group, y = Outcome, group = Name, color = Name)) +
+graph3 <- ggplot(d_ksandbbs, aes(x = pitch_group, y = Outcome, group = Name, color = Name)) +
   geom_point() +
   geom_line()
 			
@@ -241,6 +241,14 @@ d_obp_collapsed <- d_obp %>%
 
 dpitchperf <- rbind(d_ba_collapsed, d_slg_collapsed, d_obp_collapsed)
 
-ggplot(dpitchperf, aes(x = pitch_group, y = Outcome, group = Name, color = Name)) +
+graph4 <- ggplot(dpitchperf, aes(x = pitch_group, y = Outcome, group = Name, color = Name)) +
   geom_point() +
   geom_line()
+
+#R markdown attempt
+
+plot_list <- list(graph1, graph2, graph3, graph4)
+file <- tempfile()
+saveRDS(plot_list, file)
+rmarkdown::render('rmarkdownfile.Rmd', params = list(file = file))
+                  
