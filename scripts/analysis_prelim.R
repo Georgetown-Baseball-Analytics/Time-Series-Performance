@@ -40,6 +40,13 @@ graph1 <- ggplot(d_strikepct) +
 	labs(title = paste(pitcher, "Strike % by Pitch Count"), y = "Strike Percentage", x = "Pitch Number") +
 	theme_bw()
 
+ggplot(d_strikepct) +
+  geom_point(aes(x = pitch_group, y = strike_pct)) +
+  geom_line(aes(x = pitch_group, y = strike_pct, group = 1)) +
+  scale_y_continuous(labels = scales::percent) +
+  labs(title = paste(pitcher, "Strike % by Pitch Count"), y = "Strike Percentage", x = "Pitch Number") +
+  theme_bw()
+
 #strike % across innings
 
 d_strikepct_innings <- d %>% 
@@ -63,6 +70,12 @@ graph2 <- ggplot(d_strikepct_innings) +
   labs(title = paste(pitcher, "Strike % by Inning"), y = "Strike Percentage", x = "Inning Number") +
   theme_bw()
 
+ggplot(d_strikepct_innings) +
+  geom_point(aes(x = inning_num, y = strike_pct)) +
+  geom_line(aes(x = inning_num, y = strike_pct, group = 1)) +
+  scale_y_continuous(labels = scales::percent) +
+  labs(title = paste(pitcher, "Strike % by Inning"), y = "Strike Percentage", x = "Inning Number") +
+  theme_bw()
 
 #Ks and BBs by pitch count
 
@@ -96,6 +109,10 @@ dbb <- d %>%
 d_ksandbbs <- rbind(dk, dbb)
 
 graph3 <- ggplot(d_ksandbbs, aes(x = pitch_group, y = Outcome, group = Name, color = Name)) +
+  geom_point() +
+  geom_line()
+
+ggplot(d_ksandbbs, aes(x = pitch_group, y = Outcome, group = Name, color = Name)) +
   geom_point() +
   geom_line()
 			
@@ -242,6 +259,10 @@ d_obp_collapsed <- d_obp %>%
 dpitchperf <- rbind(d_ba_collapsed, d_slg_collapsed, d_obp_collapsed)
 
 graph4 <- ggplot(dpitchperf, aes(x = pitch_group, y = Outcome, group = Name, color = Name)) +
+  geom_point() +
+  geom_line()
+
+ggplot(dpitchperf, aes(x = pitch_group, y = Outcome, group = Name, color = Name)) +
   geom_point() +
   geom_line()
 
