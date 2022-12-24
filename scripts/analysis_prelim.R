@@ -33,12 +33,12 @@ d_strikepct <- d %>%
 
 pitcher <- unique(d$pitcher)
 
-graph1 <- ggplot(d_strikepct) +
-	geom_point(aes(x = pitch_group, y = strike_pct)) +
-	geom_line(aes(x = pitch_group, y = strike_pct, group = 1)) +
-	scale_y_continuous(labels = scales::percent) +
-	labs(title = paste(pitcher, "Strike % by Pitch Count"), y = "Strike Percentage", x = "Pitch Number") +
-	theme_bw()
+#graph1 <- ggplot(d_strikepct) +
+#	geom_point(aes(x = pitch_group, y = strike_pct)) +
+#	geom_line(aes(x = pitch_group, y = strike_pct, group = 1)) +
+#	scale_y_continuous(labels = scales::percent) +
+#	labs(title = paste(pitcher, "Strike % by Pitch Count"), y = "Strike Percentage", x = "Pitch Number") +
+#	theme_bw()
 
 ggplot(d_strikepct) +
   geom_point(aes(x = pitch_group, y = strike_pct)) +
@@ -63,18 +63,72 @@ d_strikepct_innings <- d %>%
 
 pitcher <- unique(d$pitcher)
 
-graph2 <- ggplot(d_strikepct_innings) +
-  geom_point(aes(x = inning_num, y = strike_pct)) +
-  geom_line(aes(x = inning_num, y = strike_pct, group = 1)) +
-  scale_y_continuous(labels = scales::percent) +
-  labs(title = paste(pitcher, "Strike % by Inning"), y = "Strike Percentage", x = "Inning Number") +
-  theme_bw()
+#graph2 <- ggplot(d_strikepct_innings) +
+#  geom_point(aes(x = inning_num, y = strike_pct)) +
+#  geom_line(aes(x = inning_num, y = strike_pct, group = 1)) +
+#  scale_y_continuous(labels = scales::percent) +
+#  labs(title = paste(pitcher, "Strike % by Inning"), y = "Strike Percentage", x = "Inning Number") +
+#  theme_bw()
 
 ggplot(d_strikepct_innings) +
   geom_point(aes(x = inning_num, y = strike_pct)) +
   geom_line(aes(x = inning_num, y = strike_pct, group = 1)) +
   scale_y_continuous(labels = scales::percent) +
   labs(title = paste(pitcher, "Strike % by Inning"), y = "Strike Percentage", x = "Inning Number") +
+  theme_bw()
+
+#K and BB rate by pitch count ----------------------------------------------------------------------------
+
+d_kandbbrate <- d %>% 
+  group_by(outing_id, pa_id) %>% 
+  summarize(no_result = sum(!is.na(bip_result)) + sum(!is.na(non_bip_result)))
+
+assertthat::assert_that(all(d_kandbbrate$no_result == 1))
+
+d_kandbbrate <- d %>% 
+  filter(!is.na(bip_result) | !is.na(non_bip_result)) %>% 
+  group_by(pitch_group, outing_id, pa_id) %>% 
+  summarize(
+    pa_outcome = if_else(!is.na(bip_result), bip_result, non_bip_result)
+  ) %>% 
+  mutate( 
+    k_bin = case_when(
+      pa_outcome %in% c(
+        "Strikeout"
+      ) ~ 1,
+      TRUE ~ 0
+      # do this for all
+    ),
+    bb_bin = case_when(
+      pa_outcome %in% c(
+        "Walk"
+      ) ~ 1,
+      TRUE ~ 0
+      # do this for all
+    )
+  )
+
+d_krate_collapsed <- d_kandbbrate %>% 
+  group_by(pitch_group) %>% 
+  summarize(
+    Outcome = mean(k_bin, na.rm = T),
+    Name = "K rate"
+  )
+
+d_bbrate_collapsed <- d_kandbbrate %>% 
+  group_by(pitch_group) %>% 
+  summarize(
+    Outcome = mean(bb_bin, na.rm = T),
+    Name = "BB rate"
+  )
+
+d_kandbbrate_graph <- rbind(d_krate_collapsed,d_bbrate_collapsed)
+
+ggplot(d_kandbbrate_graph, aes(x = pitch_group, y = Outcome, group = Name, color = Name)) +
+  geom_point() +
+  geom_line() +
+  scale_y_continuous(labels = scales::percent) +
+  labs(title = paste(pitcher, "Strikeout and Walk Rate by Pitch Count"), y = "Rate", x = "Pitch Count") +
   theme_bw()
 
 #Ks and BBs by pitch count
@@ -108,9 +162,9 @@ dbb <- d %>%
 
 d_ksandbbs <- rbind(dk, dbb)
 
-graph3 <- ggplot(d_ksandbbs, aes(x = pitch_group, y = Outcome, group = Name, color = Name)) +
-  geom_point() +
-  geom_line()
+#graph3 <- ggplot(d_ksandbbs, aes(x = pitch_group, y = Outcome, group = Name, color = Name)) +
+#  geom_point() +
+#  geom_line()
 
 ggplot(d_ksandbbs, aes(x = pitch_group, y = Outcome, group = Name, color = Name)) +
   geom_point() +
@@ -258,9 +312,9 @@ d_obp_collapsed <- d_obp %>%
 
 dpitchperf <- rbind(d_ba_collapsed, d_slg_collapsed, d_obp_collapsed)
 
-graph4 <- ggplot(dpitchperf, aes(x = pitch_group, y = Outcome, group = Name, color = Name)) +
-  geom_point() +
-  geom_line()
+#graph4 <- ggplot(dpitchperf, aes(x = pitch_group, y = Outcome, group = Name, color = Name)) +
+#  geom_point() +
+#  geom_line()
 
 ggplot(dpitchperf, aes(x = pitch_group, y = Outcome, group = Name, color = Name)) +
   geom_point() +
@@ -268,8 +322,8 @@ ggplot(dpitchperf, aes(x = pitch_group, y = Outcome, group = Name, color = Name)
 
 #R markdown attempt
 
-plot_list <- list(graph1, graph2, graph3, graph4)
-file <- tempfile()
-saveRDS(plot_list, file)
-rmarkdown::render('rmarkdownfile.Rmd', params = list(file = file))
+#plot_list <- list(graph1, graph2, graph3, graph4)
+#file <- tempfile()
+#saveRDS(plot_list, file)
+#rmarkdown::render('rmarkdownfile.Rmd', params = list(file = file))
                   
