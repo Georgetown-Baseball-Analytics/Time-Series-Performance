@@ -52,10 +52,9 @@ rounded_avg_pitches_per_outing <- round(mean(outing_pitch_counts$num_pitches), d
 std_pitches_per_outing <- sd(outing_pitch_counts$num_pitches)
 upper_bound <- (avg_pitches_per_outing/10+1) + (std_pitches_per_outing/10)
 lower_bound <- (avg_pitches_per_outing/10+1) - (std_pitches_per_outing/10)
-typeof(upper_bound)
 
 graph1 <- ggplot(d_strikepct) +
-#  annotate("rect", xmin = 1.0, xmax = 5.0, ymin = 0.0, ymax = 1.0, alpha = .5) +    need to make x axis continuous to draw a rect
+#  annotate("rect", xmin = upper_bound, xmax = Inf, ymin = 0.0, ymax = Inf, alpha = .5) +
   geom_point(aes(x = pitch_group, y = strike_pct)) +
   geom_line(aes(x = pitch_group, y = strike_pct, group = 1)) +
   geom_vline(aes(x = pitch_group, y = strike_pct), xintercept = upper_bound, linetype = "dotted", lwd = 1) +
@@ -397,7 +396,8 @@ dpitchperf <- rbind(avg_aggregation(d), slg_aggregation(d), ops_aggregation(d))
 
 graph5 <- ggplot(dpitchperf, aes(x = pitch_group, y = Outcome, group = Name, color = Name)) +
   geom_point() +
-  geom_line()
+  geom_line() +
+  theme_bw()
 
 return(graph5)
 }
