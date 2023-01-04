@@ -25,6 +25,26 @@ return(d)
 
 }
 
+#Number of pitches in each outing
+
+pitches_per_outing <- function(d) {
+  pitcher <- unique(d$pitcher)
+  
+  outing_pitch_counts <- d %>% 
+    group_by(outing_id) %>% 
+    summarise(num_pitches = n())
+  
+  graph1 <- ggplot(outing_pitch_counts, aes(x = outing_id, y = num_pitches)) +
+    geom_point() +
+    geom_line() +
+    labs(
+      title = paste(pitcher, "Number of Pitches in Each Outing"), 
+      y = "Number of Pitches Thrown", 
+      x = "Outing Number",
+    ) +
+    theme_bw()
+}
+
 #Strike % across pitch counts
 
 strikepct_pitchcount <- function(d) {
@@ -52,21 +72,23 @@ rounded_avg_pitches_per_outing <- round(mean(outing_pitch_counts$num_pitches), d
 std_pitches_per_outing <- sd(outing_pitch_counts$num_pitches)
 upper_bound <- (avg_pitches_per_outing/10+1) + (std_pitches_per_outing/10)
 lower_bound <- (avg_pitches_per_outing/10+1) - (std_pitches_per_outing/10)
+num_outings <- nrow(outing_pitch_counts)
 
 graph1 <- ggplot(d_strikepct) +
-#  annotate("rect", xmin = upper_bound, xmax = Inf, ymin = 0.0, ymax = Inf, alpha = .5) +
   geom_point(aes(x = pitch_group, y = strike_pct)) +
   geom_line(aes(x = pitch_group, y = strike_pct, group = 1)) +
   geom_vline(aes(x = pitch_group, y = strike_pct), xintercept = upper_bound, linetype = "dotted", lwd = 1) +
-  geom_vline(aes(x = pitch_group, y = strike_pct), xintercept = lower_bound, linetype = "dotted", lwd = 1) +
   scale_y_continuous(labels = scales::percent) +
   labs(
     title = paste(pitcher, "Strike % by Pitch Count"), 
     y = "Strike Percentage", 
     x = "Pitch Number",
-    caption = paste(pitcher, "averaged", rounded_avg_pitches_per_outing, "pitches per outing")
+    caption = paste("In this data set,",pitcher, "averaged", rounded_avg_pitches_per_outing, "pitches per outing over", num_outings, "outings.")
     ) +
-  theme_bw()
+  theme_bw() +
+  theme(
+    plot.caption = element_text(size = 9)
+  )
 
 return(graph1)
 
@@ -151,12 +173,31 @@ d_kandbbrate_graph <- rbind(d_krate_collapsed,d_bbrate_collapsed)
 
 pitcher <- unique(d$pitcher)
 
+outing_pitch_counts <- d %>% 
+  group_by(outing_id) %>% 
+  summarise(num_pitches = n())
+
+avg_pitches_per_outing <- mean(outing_pitch_counts$num_pitches)
+rounded_avg_pitches_per_outing <- round(mean(outing_pitch_counts$num_pitches), digits = 0)
+std_pitches_per_outing <- sd(outing_pitch_counts$num_pitches)
+upper_bound <- (avg_pitches_per_outing/10+1) + (std_pitches_per_outing/10)
+lower_bound <- (avg_pitches_per_outing/10+1) - (std_pitches_per_outing/10)
+num_outings <- nrow(outing_pitch_counts)
+
 graph3 <- ggplot(d_kandbbrate_graph, aes(x = pitch_group, y = Outcome, group = Name, color = Name)) +
   geom_point() +
   geom_line() +
+  geom_vline(aes(x = pitch_group, y = strike_pct), xintercept = upper_bound, linetype = "dotted", lwd = 1) +
   scale_y_continuous(labels = scales::percent) +
-  labs(title = paste(pitcher, "Strikeout and Walk Rate by Pitch Count"), y = "Rate", x = "Pitch Count") +
-  theme_bw()
+  labs(
+    title = paste(pitcher, "Strikeout and Walk Rate by Pitch Count"), 
+    x = "Pitch Number",
+    caption = paste("In this data set,",pitcher, "averaged", rounded_avg_pitches_per_outing, "pitches per outing over", num_outings, "outings.")
+    ) +
+  theme_bw() +
+  theme(
+    plot.caption = element_text(size = 9)
+  )
 
 return(graph3)
 
@@ -257,6 +298,53 @@ return(d_ba_collapsed)
 
 }
 
+# On Base Percentage Aggregation
+
+obp_aggregation <- function(d) {
+ 
+  d_obp <- d %>% 
+    group_by(outing_id, pa_id) %>% 
+    summarize(no_result = sum(!is.na(bip_result)) + sum(!is.na(non_bip_result)))
+  
+  #assertthat::assert_that(all(d_obp$no_result == 1))
+  # fix later
+  
+  
+  d_obp <- d %>% 
+    filter(!is.na(bip_result) | !is.na(non_bip_result)) %>% 
+    group_by(pitch_group, outing_id, pa_id) %>% 
+    summarize(
+      pa_outcome = if_else(!is.na(bip_result), bip_result, non_bip_result)
+    ) %>% 
+    mutate( # this is what changes for slugging and OBP
+      obp_bin = case_when(
+        pa_outcome %in% c(
+          "Single",
+          "Double",
+          "Ground Rule Double",
+          "Triple",
+          "Hit By Pitch",
+          "Home Run",
+          "Walk"
+        ) ~ 1,
+        pa_outcome %in% c(
+          "Sacrifice Bunt"
+        ) ~ NA_real_,
+        TRUE ~ 0
+        # do this for all
+      )
+    )
+  
+  d_obp_collapsed <- d_obp %>% 
+    group_by(pitch_group) %>% 
+    summarize(
+      Outcome = mean(obp_bin, na.rm = T),
+      Name = ".OBP"
+    ) 
+   
+  return(d_obp_collapsed)
+}
+
 # Slugging Percentage Aggregation 
 
 slg_aggregation <- function(d) {
@@ -343,7 +431,7 @@ d_obp <- d %>%
 d_obp_collapsed <- d_obp %>% 
   group_by(pitch_group) %>% 
   summarize(
-    obp = mean(obp_bin, na.rm = T),
+    obp = mean(obp_bin, na.rm = T)
   )
 
 d_slg <- d %>% 
@@ -373,7 +461,7 @@ d_slg <- d %>%
 d_slg_collapsed <- d_slg %>% 
   group_by(pitch_group) %>% 
   summarize(
-    slg = (sum(single_bin) + 2*sum(double_bin) + 3*sum(triple_bin) + 4*sum(hr_bin))/sum(at_bat),
+    slg = (sum(single_bin) + 2*sum(double_bin) + 3*sum(triple_bin) + 4*sum(hr_bin))/sum(at_bat)
   )
 
 d_ops_collapsed <- merge(d_slg_collapsed,d_obp_collapsed)
@@ -388,33 +476,76 @@ d_ops_collapsed <- d_ops_collapsed %>%
 return(d_ops_collapsed)
 }
 
-#AVG, SLG, and OPS by pitch count
+#AVG and OBP by pitch count
 
-performance_pitchcount <- function(d) {
+avg_and_obp_pitchcount <- function(d) {
   
-dpitchperf <- rbind(avg_aggregation(d), slg_aggregation(d), ops_aggregation(d))
+dpitchperf <- rbind(avg_aggregation(d), obp_aggregation(d))
+
+pitcher <- unique(d$pitcher)
+
+outing_pitch_counts <- d %>% 
+  group_by(outing_id) %>% 
+  summarise(num_pitches = n())
+
+avg_pitches_per_outing <- mean(outing_pitch_counts$num_pitches)
+rounded_avg_pitches_per_outing <- round(mean(outing_pitch_counts$num_pitches), digits = 0)
+std_pitches_per_outing <- sd(outing_pitch_counts$num_pitches)
+upper_bound <- (avg_pitches_per_outing/10+1) + (std_pitches_per_outing/10)
+lower_bound <- (avg_pitches_per_outing/10+1) - (std_pitches_per_outing/10)
+num_outings <- nrow(outing_pitch_counts)
 
 graph5 <- ggplot(dpitchperf, aes(x = pitch_group, y = Outcome, group = Name, color = Name)) +
   geom_point() +
   geom_line() +
-  theme_bw()
+  geom_vline(aes(x = pitch_group, y = strike_pct), xintercept = upper_bound, linetype = "dotted", lwd = 1) +
+  labs(
+    title = paste(pitcher, ".AVG and .OBP by Pitch Count"), 
+    x = "Pitch Number",
+    caption = paste("In this data set,",pitcher, "averaged", rounded_avg_pitches_per_outing, "pitches per outing over", num_outings, "outings.")
+  ) +
+  theme_bw() +
+  theme(
+    plot.caption = element_text(size = 9)
+  )
 
 return(graph5)
 }
 
-#Graph creations
+#SLG and OPS by pitch count
 
-#d <- group_pitch_counts(d)
-#strikepct_innings(d)
-#strikepct_pitchcount(d)
-#kandbbrate_pitchcount(d)
-#kandbbcount_pitchcount(d)
-#performance_pitchcount(d)
+slg_and_ops_pitchcount <- function(d) {
+  
+  dpitchperf <- rbind(slg_aggregation(d), ops_aggregation(d))
+  
+  pitcher <- unique(d$pitcher)
+  
+  outing_pitch_counts <- d %>% 
+    group_by(outing_id) %>% 
+    summarise(num_pitches = n())
+  
+  avg_pitches_per_outing <- mean(outing_pitch_counts$num_pitches)
+  rounded_avg_pitches_per_outing <- round(mean(outing_pitch_counts$num_pitches), digits = 0)
+  std_pitches_per_outing <- sd(outing_pitch_counts$num_pitches)
+  upper_bound <- (avg_pitches_per_outing/10+1) + (std_pitches_per_outing/10)
+  lower_bound <- (avg_pitches_per_outing/10+1) - (std_pitches_per_outing/10)
+  num_outings <- nrow(outing_pitch_counts)
+  
+  graph5 <- ggplot(dpitchperf, aes(x = pitch_group, y = Outcome, group = Name, color = Name)) +
+    geom_point() +
+    geom_line() +
+    geom_vline(aes(x = pitch_group, y = strike_pct), xintercept = upper_bound, linetype = "dotted", lwd = 1) +
+    labs(
+      title = paste(pitcher, ".SLG and .OPS by Pitch Count"), 
+      x = "Pitch Number",
+      caption = paste("In this data set,",pitcher, "averaged", rounded_avg_pitches_per_outing, "pitches per outing over", num_outings, "outings.")
+    ) +
+    theme_bw() +
+    theme(
+      plot.caption = element_text(size = 9)
+    )
+  
+  return(graph5)
+}
 
-#R markdown code _______________________________________________________________________________________________________
-
-#plot_list <- list(graph1, graph2, graph3, graph4)
-#file <- tempfile()
-#saveRDS(plot_list, file)
-#rmarkdown::render('rmarkdownfile.Rmd', params = list(file = file))
                   

@@ -9,7 +9,8 @@ params:
 knitr::opts_chunk$set(fig.width = 10, fig.height = 6, echo = FALSE)
 ```
 
-## Angelo Tonas 2019-2021
+## Georgetown Baseball: LHP Angelo Tonas 2019-2022
+*Vertical dotted line is at 1 standard deviation above the mean pitches per outing
 
 ```{r, echo=FALSE}
 plot_list <- read_rds(params$file)
