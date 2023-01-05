@@ -45,15 +45,19 @@ add_outing_id <- function(d) {
 	cur_outing <- d$notes[1]
 	cur_outing_num <- 1
 	
+	cur_inningnum <- as.numeric(d$inning_num[1])
+	
 	for (i in seq_along(d$notes)) {
-		if (d$notes[i] == cur_outing) {
+		if (d$notes[i] == cur_outing && d$inning_num[i] >= cur_inningnum) {
 			d$outing_id[i] <- cur_outing_num
+			cur_inningnum <- d$inning_num[i]
 		}
 		
 		else {
 			cur_outing_num <- cur_outing_num + 1
 			d$outing_id[i] <- cur_outing_num
 			cur_outing <- d$notes[i]
+			cur_inningnum <- d$inning_num[i]
 		}
 	}
 	return(d)
