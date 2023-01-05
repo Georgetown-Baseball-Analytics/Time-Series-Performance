@@ -28,7 +28,7 @@ clean_inning <- function(d) {
 		mutate(
 			top_or_bottom_letter = str_remove_all(inning, "[0-9]"),
 			top_of_frame = if_else(top_or_bottom_letter == "T", 1, 0),
-			inning_num = str_remove_all(inning, "[^0-9]")
+			inning_num = as.numeric(str_remove_all(inning, "[^0-9]"))
 		)
 }
 
@@ -45,10 +45,10 @@ add_outing_id <- function(d) {
 	cur_outing <- d$notes[1]
 	cur_outing_num <- 1
 	
-	cur_inningnum <- as.numeric(d$inning_num[1])
+	cur_inningnum <- d$inning_num[1]
 	
 	for (i in seq_along(d$notes)) {
-		if (d$notes[i] == cur_outing && d$inning_num[i] >= cur_inningnum) {
+		if (d$notes[i] == cur_outing && d$inning_num[i] >= cur_inningnum && d$inning_num[i] <= cur_inningnum + 1) {
 			d$outing_id[i] <- cur_outing_num
 			cur_inningnum <- d$inning_num[i]
 		}
@@ -62,7 +62,6 @@ add_outing_id <- function(d) {
 	}
 	return(d)
 	
-	# does not work if pitcher pitches in multiple consecutive games against the same opponent
 }
 
 add_pa_id <- function(d) {
