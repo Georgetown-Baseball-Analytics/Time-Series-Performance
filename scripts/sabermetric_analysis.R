@@ -34,7 +34,10 @@ pitches_per_outing <- function(d) {
     group_by(outing_id) %>% 
     summarise(num_pitches = n())
   
-  graph1 <- ggplot(outing_pitch_counts, aes(x = outing_id, y = num_pitches)) +
+  outing_pitch_counts <- outing_pitch_counts %>% 
+    mutate(outing_id_graph = rev(outing_id))
+  
+  graph1 <- ggplot(outing_pitch_counts, aes(x = outing_id_graph, y = num_pitches)) +
     geom_point() +
     geom_line() +
     labs(
@@ -43,6 +46,8 @@ pitches_per_outing <- function(d) {
       x = "Outing Number",
     ) +
     theme_bw()
+  
+  return(graph1)
 }
 
 #Strike % across pitch counts
@@ -116,6 +121,7 @@ graph2 <- ggplot(d_strikepct_innings) +
   geom_point(aes(x = inning_num, y = strike_pct)) +
   geom_line(aes(x = inning_num, y = strike_pct, group = 1)) +
   scale_y_continuous(labels = scales::percent) +
+  scale_x_continuous(breaks = 1:max(d$inning_num)) +
   labs(title = paste(pitcher, "Strike % by Inning"), y = "Strike Percentage", x = "Inning Number") +
   theme_bw()
 
