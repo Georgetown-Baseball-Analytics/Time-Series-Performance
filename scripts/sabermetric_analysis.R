@@ -84,6 +84,7 @@ graph1 <- ggplot(d_strikepct) +
   geom_line(aes(x = pitch_group, y = strike_pct, group = 1)) +
   geom_vline(aes(x = pitch_group, y = strike_pct), xintercept = upper_bound, linetype = "dotted", lwd = 1) +
   scale_y_continuous(labels = scales::percent) +
+  scale_x_discrete(limits = unique(d$pitch_group)) +
   labs(
     title = paste(pitcher, "Strike % by Pitch Count"), 
     y = "Strike Percentage", 
@@ -508,6 +509,7 @@ graph5 <- ggplot(dpitchperf, aes(x = pitch_group, y = Outcome, group = Name, col
   geom_point() +
   geom_line() +
   geom_vline(aes(x = pitch_group, y = strike_pct), xintercept = upper_bound, linetype = "dotted", lwd = 1) +
+  scale_x_discrete(limits = unique(d$pitch_group)) +
   labs(
     title = paste(pitcher, ".AVG and .OBP by Pitch Count"), 
     x = "Pitch Number",
@@ -545,6 +547,7 @@ slg_and_ops_pitchcount <- function(d) {
     geom_point() +
     geom_line() +
     geom_vline(aes(x = pitch_group, y = strike_pct), xintercept = upper_bound, linetype = "dotted", lwd = 1) +
+    scale_x_discrete(limits = unique(d$pitch_group)) +
     labs(
       title = paste(pitcher, ".SLG and .OPS by Pitch Count"), 
       x = "Pitch Number",
