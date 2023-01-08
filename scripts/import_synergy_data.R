@@ -184,4 +184,3 @@ export_data <- function(d) {
 d <- import_data()
 d <- clean_data_pipeline(d)
 d <- export_data(d)
-

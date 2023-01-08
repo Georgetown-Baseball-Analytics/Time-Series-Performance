@@ -195,11 +195,13 @@ graph3 <- ggplot(d_kandbbrate_graph, aes(x = pitch_group, y = Outcome, group = N
   geom_line() +
   geom_vline(aes(x = pitch_group, y = strike_pct), xintercept = upper_bound, linetype = "dotted", lwd = 1) +
   scale_y_continuous(labels = scales::percent) +
+  scale_x_discrete(limits = unique(d$pitch_group)) +
   labs(
     title = paste(pitcher, "Strikeout and Walk Rate by Pitch Count"), 
     x = "Pitch Number",
     caption = paste("In this data set,",pitcher, "averaged", rounded_avg_pitches_per_outing, "pitches per outing over", num_outings, "outings.")
     ) +
+  scale_color_manual(values = c("red", "dark green")) +
   theme_bw() +
   theme(
     plot.caption = element_text(size = 9)
@@ -287,7 +289,8 @@ d_ba <- d %>%
                 "Field Error",
                 "Grounded Into Double Play",
                 "Fielder's Choice - Out",
-                "Fielder's Choice - Safe"
+                "Fielder's Choice - Safe",
+                "Infield Fly Rule"
             ) ~ 0,
             TRUE ~ NA_real_
             # do this for all
@@ -510,6 +513,7 @@ graph5 <- ggplot(dpitchperf, aes(x = pitch_group, y = Outcome, group = Name, col
     x = "Pitch Number",
     caption = paste("In this data set,",pitcher, "averaged", rounded_avg_pitches_per_outing, "pitches per outing over", num_outings, "outings.")
   ) +
+  scale_color_manual(values = c("purple", "orange")) +
   theme_bw() +
   theme(
     plot.caption = element_text(size = 9)
@@ -547,6 +551,7 @@ slg_and_ops_pitchcount <- function(d) {
       caption = paste("In this data set,",pitcher, "averaged", rounded_avg_pitches_per_outing, "pitches per outing over", num_outings, "outings.")
     ) +
     theme_bw() +
+    scale_color_manual(values = c("blue", "brown")) +
     theme(
       plot.caption = element_text(size = 9)
     )

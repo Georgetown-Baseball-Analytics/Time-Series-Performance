@@ -17,3 +17,4 @@ plot_list <- list(graph1, graph2, graph3, graph4, graph5, graph6)
 file <- tempfile()
 saveRDS(plot_list, file)
 rmarkdown::render('rmarkdownfile.Rmd', params = list(file = file))
+
