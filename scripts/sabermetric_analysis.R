@@ -9,13 +9,16 @@ group_pitch_counts <- function(d) {
   
 d <- replace(d,d == "", NA)
 
+is.wholenumber <-
+  function(x, tol = .Machine$double.eps^0.5)  abs(x - round(x)) < tol
+
 d <- d %>% 
 		group_by(outing_id) %>% 
 	mutate(
 		pitch_num_by_outing = row_number()) %>% 
 	ungroup() %>% 
 	mutate(
-		pitch_group_by_ten = (pitch_num_by_outing %/% 10) + 1,
+		pitch_group_by_ten = if_else(is.wholenumber(pitch_num_by_outing/10),(pitch_num_by_outing %/% 10),(pitch_num_by_outing %/% 10) + 1),
 		pg_b = pitch_group_by_ten * 10,
 		pg_a = pg_b - 9,
 		pitch_group = str_c(pg_a, pg_b, sep = "-")

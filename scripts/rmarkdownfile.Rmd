@@ -9,7 +9,7 @@ params:
 knitr::opts_chunk$set(fig.width = 10, fig.height = 6, warning = FALSE, echo = FALSE)
 ```
 
-## Georgetown Baseball: RHP Jake Bloss 2020-2022
+## Georgetown Baseball: RHP Cody Jensen 2019-2022
 *Vertical dotted line is at 1 standard deviation above the mean pitches per outing
 
 ```{r, echo=FALSE}
