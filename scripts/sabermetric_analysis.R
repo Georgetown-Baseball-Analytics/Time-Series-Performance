@@ -24,6 +24,17 @@ d <- d %>%
 		pitch_group = str_c(pg_a, pg_b, sep = "-")
 		)
 
+outing_pitch_counts <- d %>% 
+  group_by(outing_id) %>% 
+  summarise(num_pitches = n())
+
+outing_pitch_counts <- outing_pitch_counts %>% 
+  mutate(outing_id_graph = rev(outing_id))
+
+avg_pitches_per_outing <- mean(outing_pitch_counts$num_pitches)
+rounded_avg_pitches_per_outing <- round(mean(outing_pitch_counts$num_pitches), digits = 0)
+std_pitches_per_outing <- sd(outing_pitch_counts$num_pitches)
+
 return(d)
 
 }
@@ -85,7 +96,7 @@ num_outings <- nrow(outing_pitch_counts)
 graph1 <- ggplot(d_strikepct) +
   geom_point(aes(x = pitch_group, y = strike_pct)) +
   geom_line(aes(x = pitch_group, y = strike_pct, group = 1)) +
-  geom_vline(aes(x = pitch_group, y = strike_pct), xintercept = upper_bound, linetype = "dotted", lwd = 1) +
+  geom_vline(aes(x = pitch_group, y = strike_pct), xintercept = avg_pitches_per_outing/10+1, linetype = "dotted", lwd = 1) +
   scale_y_continuous(labels = scales::percent) +
   scale_x_discrete(limits = unique(d$pitch_group)) +
   labs(
@@ -197,7 +208,7 @@ num_outings <- nrow(outing_pitch_counts)
 graph3 <- ggplot(d_kandbbrate_graph, aes(x = pitch_group, y = Outcome, group = Name, color = Name)) +
   geom_point() +
   geom_line() +
-  geom_vline(aes(x = pitch_group, y = strike_pct), xintercept = upper_bound, linetype = "dotted", lwd = 1) +
+  geom_vline(aes(x = pitch_group, y = strike_pct), xintercept = avg_pitches_per_outing/10+1, linetype = "dotted", lwd = 1) +
   scale_y_continuous(labels = scales::percent) +
   scale_x_discrete(limits = unique(d$pitch_group)) +
   labs(
@@ -511,7 +522,7 @@ num_outings <- nrow(outing_pitch_counts)
 graph5 <- ggplot(dpitchperf, aes(x = pitch_group, y = Outcome, group = Name, color = Name)) +
   geom_point() +
   geom_line() +
-  geom_vline(aes(x = pitch_group, y = strike_pct), xintercept = upper_bound, linetype = "dotted", lwd = 1) +
+  geom_vline(aes(x = pitch_group, y = strike_pct), xintercept = avg_pitches_per_outing/10+1, linetype = "dotted", lwd = 1) +
   scale_x_discrete(limits = unique(d$pitch_group)) +
   labs(
     title = paste(pitcher, ".AVG and .OBP by Pitch Count"), 
@@ -549,7 +560,7 @@ slg_and_ops_pitchcount <- function(d) {
   graph5 <- ggplot(dpitchperf, aes(x = pitch_group, y = Outcome, group = Name, color = Name)) +
     geom_point() +
     geom_line() +
-    geom_vline(aes(x = pitch_group, y = strike_pct), xintercept = upper_bound, linetype = "dotted", lwd = 1) +
+    geom_vline(aes(x = pitch_group, y = strike_pct), xintercept = avg_pitches_per_outing/10+1, linetype = "dotted", lwd = 1) +
     scale_x_discrete(limits = unique(d$pitch_group)) +
     labs(
       title = paste(pitcher, ".SLG and .OPS by Pitch Count"), 

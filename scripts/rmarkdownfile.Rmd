@@ -6,7 +6,7 @@ params:
   file: 'rmarkdownfile.Rds'
 ---
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(fig.width = 10, fig.height = 6, warning = FALSE, echo = FALSE)
+knitr::opts_chunk$set(fig.width = 8, fig.height = 3.5, warning = FALSE, echo = FALSE)
 ```
 
 ## Georgetown Baseball: RHP Cody Jensen 2019-2022
