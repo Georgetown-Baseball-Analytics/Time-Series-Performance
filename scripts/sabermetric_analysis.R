@@ -35,6 +35,9 @@ avg_pitches_per_outing <- mean(outing_pitch_counts$num_pitches)
 rounded_avg_pitches_per_outing <- round(mean(outing_pitch_counts$num_pitches), digits = 0)
 std_pitches_per_outing <- sd(outing_pitch_counts$num_pitches)
 
+d <- d %>% 
+  filter(pitch_num_by_outing <= avg_pitches_per_outing + std_pitches_per_outing)
+
 return(d)
 
 }
