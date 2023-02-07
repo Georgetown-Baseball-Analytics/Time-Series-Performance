@@ -10,7 +10,7 @@ knitr::opts_chunk$set(fig.width = 8, fig.height = 3.5, warning = FALSE, echo = F
 ```
 
 ## Georgetown Baseball: RHP Cody Jensen 2019-2022
-*Vertical dotted line is at 1 standard deviation above the mean pitches per outing
+*Vertical dotted line is at the mean # of pitches per outing
 
 ```{r, echo=FALSE}
 plot_list <- read_rds(params$file)
