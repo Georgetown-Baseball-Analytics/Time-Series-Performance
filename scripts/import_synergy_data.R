@@ -146,6 +146,13 @@ add_pa_id <- function(d) {
 	d <- d %>% 
 		unnest(cols = data)
 	
+	d <- d %>% 
+	  mutate(batting_order = case_when(
+	    pa_id %% 9 == 0 ~ 9,
+	    TRUE ~ pa_id %% 9
+	    )
+	  )
+	
 	return(d)
 }
 
