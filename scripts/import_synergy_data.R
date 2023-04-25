@@ -15,6 +15,7 @@ import_data <- function() {
     d1 <- seq.int(nrow(d))
     d <- cbind(d1,d)
     names(d) <- names(d)[-1]
+    d <- d[1:ncol(d)-1]
     return(d)
     break
   }
@@ -182,6 +183,13 @@ clean_data_pipeline <- function(d) {
 	return(d)
 }
 
+choose_pitcher <- function(d) {
+  chosen_pitcher <- readline(prompt = "Enter pitcher name (Last Name, First Initial.):")
+  d <- d %>% 
+    filter(Pitcher == paste("",chosen_pitcher,sep = "",collapse = ""))
+  return(d)
+}
+
 export_data <- function(d) {
   e <- readline(prompt = "Enter the clean file name: ")
   print(paste("Exported file as",e))
@@ -189,5 +197,6 @@ export_data <- function(d) {
 }
 
 d <- import_data()
+d <- choose_pitcher(d)
 d <- clean_data_pipeline(d)
 d <- export_data(d)

@@ -57,6 +57,7 @@ pitches_per_outing <- function(d) {
   graph1 <- ggplot(outing_pitch_counts, aes(x = outing_id_graph, y = num_pitches)) +
     geom_point() +
     geom_line() +
+    scale_x_continuous(breaks = unique(d$outing_id)) +
     labs(
       title = paste(pitcher, "Number of Pitches in Each Outing"), 
       y = "Number of Pitches Thrown", 
