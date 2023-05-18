@@ -9,8 +9,8 @@ params:
 knitr::opts_chunk$set(fig.width = 8, fig.height = 3.5, warning = FALSE, echo = FALSE)
 ```
 
-## Georgetown Baseball: LHP Everett Catlett 2023 through 4.16
-*Vertical dotted line is at the mean # of pitches per outing
+## Georgetown Baseball: LHP Everett Catlett 2023 through 5.16.23
+*Vertical dotted line is at the mean # of pitches per outing; pitches thrown 1 std dev above the mean # of pitches per outing have been removed from the dataset
 
 ```{r, echo=FALSE}
 plot_list <- read_rds(params$file)
