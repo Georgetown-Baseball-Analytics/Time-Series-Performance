@@ -1,5 +1,5 @@
 # DO NOT EDIT THIS SCRIPT DIRECTLY, MAKE A COPY
-#setwd("C:/Users/rajmo/Documents/Baseball/Time-Series-Performance/scripts")
+#setwd("C:/Users/knmea/Documents/GitHub/Time-Series-Performance/scripts")
 
 # Ensure you have installed the packages below. Then, make sure the import function properly imports the data you are trying to analyze.
 
@@ -98,7 +98,7 @@ add_outing_id <- function(d) {
 	    }
 	  }
 	  else {
-	    if (d$notes[i] == cur_outing && d$inning_num[i] >= cur_inningnum && d$inning_num[i] <= cur_inningnum + 1) {
+	    if (d$notes[i] == cur_outing && d$inning_num[i] >= cur_inningnum && d$inning_num[i] <= cur_inningnum + 1 && d$pitcherteam_score[i] >= cur_pitcherteamscore) {
 	      d$outing_id[i] <- cur_outing_num
 	      cur_inningnum <- d$inning_num[i]
 	      cur_pitcherteamscore <- d$pitcherteam_score[i]

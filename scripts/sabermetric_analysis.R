@@ -1,4 +1,4 @@
-#setwd("C:/Users/rajmo/Documents/Baseball/Time-Series-Performance/scripts")
+#setwd("C:/Users/knmea/Documents/GitHub/Time-Series-Performance/scripts")
 #source("import_synergy_data.R")
 
 #d <- read.csv(d)
